@@ -133,3 +133,5 @@ class CustomerSuccessBalancingTests < Minitest::Test
     out
   end
 end
+
+Minitest.run
