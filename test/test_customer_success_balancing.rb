@@ -14,21 +14,25 @@ class CustomerSuccessBalancing
   end
 
   def execute
-    # Removes customers success away
+    # Remove os CSs que estão indisponíveis
     remove_csa if customer_success_away.any?
 
-    # Organize params to facilitate the logics
+    # Ordena os parametros para facilitar a lógica
     sort_params
 
-    # class with the principal logic, commented bellow
+    # Método com a lógica principal, comentada mais abaixo
     distribute_customers
 
-    # Return 0 if there is a draw between the customer success's with most customers
+    # Retorna 0 caso exista um empate entre os CSs com mais clientes
     return 0 if draw?
 
-    # If none of the CSs has at least one customer, return 0
-    # Else return the id of the customer success with most customers
+    # Se nenhum dos CSs tiver ao menos um cliente, retorna 0
+    # Senão, retorna o id do CSs com mais clientes
     css_with_most_customers.nil? ? 0 : css_with_most_customers[:id]
+  end
+
+  def remove_csa
+    customer_success.reject! { |cs| customer_success_away.include? cs[:id] }
   end
 
   def sort_params
@@ -36,48 +40,48 @@ class CustomerSuccessBalancing
     @customers = customers.sort_by { |c| c[:score] }
   end
 
-  def remove_csa
-    customer_success.reject! { |cs| customer_success_away.include? cs[:id] }
+  def distribute_customers # rubocop:todo Metrics/AbcSize
+    @matrix = []
+
+    # Itera sobre os CSs para distribuir os clientes
+    customer_success.each_with_index do |cs, index|
+      matrix << { id: cs[:id], customer: [] }
+
+      # Itera sobre os clientes para saber se deve ser adiciona a lista do CS atual
+      customers.each do |c|
+        # Caso o score do cliente atual seja maior que o score do CS atual quebra o laço
+        break if c[:score] > cs[:score]
+
+        # Atribui o cliente atual ao CS atual caso o score do cliente seja menor que o score do CS
+        matrix[index][:customer] << c[:id] if c[:score] <= cs[:score]
+      end
+
+      # Remove os clientes que já foram pegos pelo CS atual, caso existam
+      remove_already_taken_customer(customers, matrix[index][:customer]) if matrix[index][:customer].any?
+    end
   end
 
   def remove_already_taken_customer(customers, already_taken_customer)
     customers.reject! { |c| already_taken_customer.include? c[:id] }
   end
 
-  def distribute_customers # rubocop:todo Metrics/AbcSize
-    @matrix = []
-
-    # Iterate over the CSs to distribute customers
-    customer_success.each_with_index do |cs, index|
-      matrix << { id: cs[:id], customer: [] }
-
-      # Iterate over the customers to check if he should go to current CSs
-      customers.each do |c|
-        matrix[index][:customer] << c[:id] if c[:score] <= cs[:score]
-
-        break if c[:score] > cs[:score]
-      end
-
-      # Removes customer that already been taken by the current CSs
-      remove_already_taken_customer(customers, matrix[index][:customer]) if matrix[index][:customer].any?
-    end
-  end
-
   def draw?
+    # Organiza a lista de CSs por número de clientes de forma decrecente
     matrix.sort_by! { |m| m[:customer].count }.reverse!
 
+    # Caso exista empate de número e clientes entre os dois primeiros CSs, retorna true
     return true if matrix[0][:customer].count == matrix[1][:customer].count
 
+    # Se não, retorna false
     false
   end
 
-  # Retrive the CSs with the most customers
+  # Retorna o CS com mais clientes
   def css_with_most_customers
     matrix.max_by { |m| m[:customer].count }
   end
 end
 
-# Class of tests
 class CustomerSuccessBalancingTests < Minitest::Test
   def test_scenario_one
     css =       [{ id: 1, score: 60 }, { id: 2, score: 20 },
