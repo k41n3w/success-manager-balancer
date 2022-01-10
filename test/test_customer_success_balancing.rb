@@ -97,7 +97,7 @@ class CustomerSuccessBalancingTests < Minitest::Test
     assert_equal 0, balancer.execute
   end
 
-  focus def test_scenario_three
+  def test_scenario_three
     customer_success = (1..999).to_a
     customers = Array.new(10_000, 998)
 
