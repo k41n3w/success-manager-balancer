@@ -54,6 +54,8 @@ class CustomerSuccessBalancing
       # Iterate over the customers to check if he should go to current CSs
       customers.each do |c|
         matrix[index][:customer] << c[:id] if c[:score] <= cs[:score]
+
+        break if c[:score] > cs[:score]
       end
 
       # Removes customer that already been taken by the current CSs
