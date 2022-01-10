@@ -1,10 +1,11 @@
 # Balanceador de Gerentes de Sucesso e Clientes
+[![Ruby](https://github.com/k41n3w/success-manager-balancer/actions/workflows/ruby.yml/badge.svg)](https://github.com/k41n3w/success-manager-balancer/actions/workflows/ruby.yml)
 
-Exercício de Ruby onde é preciso fazer o balanceamento entre os Gerente de Sucesso (CSs) e Clientes.
+Exercício de Ruby onde é preciso fazer o balanceamento entre os Gerente de Sucesso (CSs) x Clientes.
 
 ---
 
-## Descrição:
+## Descrição do problema:
 
 Os CSs são os Gerentes de Sucesso, são responsáveis pelo acompanhamento estratégico dos clientes.
 
